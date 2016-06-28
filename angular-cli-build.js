@@ -27,6 +27,7 @@ module.exports = function(defaults) {
       'rxjs/**/*.+(js|js.map)',
       '@angular/**/*.+(js|js.map)',
       'd3/**/*.js',
+      'd3-*/**/*.js',
       'moment/**/*.js',
       'symbol-observable/**/*.js'
     ]

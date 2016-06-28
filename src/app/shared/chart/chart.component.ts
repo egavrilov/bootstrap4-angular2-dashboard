@@ -1,6 +1,7 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, Inject, OnInit} from "@angular/core";
+import {Http} from "@angular/http";
 import * as d3 from "d3";
-
+import "rxjs/add/operator/toPromise";
 
 @Component({
   moduleId: module.id,
@@ -9,125 +10,50 @@ import * as d3 from "d3";
   styleUrls: ['chart.component.css']
 })
 export class ChartComponent implements OnInit {
-  axis = {
+  private axis = {
     xStart: 0,
-    yStart: 0,
     xEnd: 100,
+    xInterval: 10,
+    yStart: 0,
     yEnd: 100
   };
+  private data = [];
 
-  size = {
-    width: 600,
-    height: 400,
-    marginTop: 0,
-    marginRight: 0,
-    marginBottom: 0,
-    marginLeft: 0,
-  };
+  private timeformat = '%d-%b-%y';
+  private url = '/data.csv';
 
-  timeformat = '%d-%b-%y';
-
-  constructor() {
+  constructor(@Inject(Http) private http:Http) {
     // this.ex();
   }
 
-  ngOnInit() {
-    this.simpleChart();
+  ngOnInit():Promise<any> {
+    return this.http.get(this.url)
+      .toPromise()
+      .then( response => {
+        console.log(response);
+        this.data = d3.csvParse(response);
+      })
+      .then(this.placeSVG)
+  }
+
+
+  placeSVG() {
+    console.log(d3);
+    console.log(this);
   }
 
   timeChart(dates) {
-    this.axis.xStart = dates.startDate;
-    this.axis.xEnd = dates.endDate;
+    this.axis.xStart = dates[0];
+    this.axis.xEnd = dates.slice(-1)[0];
+    this.axis.xInterval = dates[1] - dates[0];
 
-    this.simpleChart();
+    // this.timeAxis();
   }
 
-  timeAxis(start, end, step){
-    console.log('Start time axis');
-    const parseDate = d3.time.format(this.timeformat).parse;
-  }
-
-
-  simpleChart() {
-    const width = this.size.width;
-    const height = this.size.height;
-
-    // range
-    const x = d3.time.scale().range([0, width]);
-    const y = d3.scale.linear().range([height, 0]);
-  }
-
-  ex() {
-    var margin = {top: 30, right: 20, bottom: 30, left: 50},
-      width = 600 - margin.left - margin.right,
-      height = 270 - margin.top - margin.bottom;
-
-// Parse the date / time
-    var parseDate = d3.time.format("%d-%b-%y").parse;
-
-// Set the ranges
-    var x = d3.time.scale().range([0, width]);
-    var y = d3.scale.linear().range([height, 0]);
-
-// Define the axes
-    var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom").ticks(5);
-
-    var yAxis = d3.svg.axis().scale(y)
-      .orient("left").ticks(5);
-
-// Define the line
-    var valueline = d3.svg.line()
-      .x(function (d:any) {
-        return x(d.date);
-      })
-      .y(function (d:any) {
-        return y(d.close);
-      });
-
-// Adds the svg canvas
-    var svg = d3.select("body")
-      .append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
-
-// Get the data
-    d3.csv("data.csv", function (error, data) {
-      data.forEach(function (d) {
-        d.date = parseDate(d.date);
-        d.close = +d.close;
-      });
-
-      // Scale the range of the data
-      x.domain(d3.extent(data, function (d:any) {
-        return d.date;
-      }));
-      y.domain([0, d3.max(data, function (d:any) {
-        return d.close;
-      })]);
-
-      // Add the valueline path.
-      svg.append("path")
-        .attr("class", "line")
-        .attr("d", valueline(data));
-
-      // Add the X Axis
-      svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-      // Add the Y Axis
-      svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-
-    });
-
-  }
-
+  // timeAxis(){
+  //   console.log('Start time axis');
+  //   return d3.scaleTime()
+  //     .domain([this.axis.xStart, this.axis.xEnd])
+  //     .range([this.axis.xInterval * this.dates.length])
+  // }
 }

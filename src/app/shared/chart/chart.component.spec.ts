@@ -2,6 +2,7 @@
 
 import { By }           from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
+import { Http } from '@angular/http';
 
 import {
   beforeEach, beforeEachProviders,
@@ -14,7 +15,9 @@ import { ChartComponent } from './chart.component';
 
 describe('Component: Chart', () => {
   it('should create an instance', () => {
-    let component = new ChartComponent();
-    expect(component).toBeTruthy();
+    inject([Http], (http:Http) => {
+      let component = new ChartComponent(http);
+      expect(component).toBeTruthy();
+    });
   });
 });

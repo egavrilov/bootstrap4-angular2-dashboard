@@ -15,7 +15,7 @@ const map:any = {
 /** User packages configuration. */
 const packages:any = {
   'moment': {main: 'src/moment'},
-  'd3': {main: 'd3'},
+  'd3': {main: 'build/d3'},
   'symbol-observable': {main: 'index'}
 };
 
